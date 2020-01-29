@@ -85,6 +85,19 @@ def notesByProvider():
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
 
+def insertOccurrence():
+    provider_id = input("Please enter the provider ID:\n")
+    fileInput = input("Enter the filename with findings occurrence to insert:\n")
+    
+    with open(fileInput) as occFile:
+        newOcc=json.load(occFile)
+    if newOcc["provider_id"] != provider_id:
+        print("Warning: Provider IDs do not match...")
+
+    print("Creating TEST occurrence")
+    api_response = API_Occurrence_Instance.create_occurrence(newOcc, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
+    pprint(api_response)
+    print("Created TEST occurrence")
 
 def deleteOccurrence():
     provider_id = input("Please enter the provider ID:\n")
@@ -93,10 +106,32 @@ def deleteOccurrence():
     api_response = API_Occurrence_Instance.delete_occurrence(configSecAdv["account_id"],configSecAdv["authToken"],provider_id, occurrence_id)
     pprint(api_response)
 
+def interactiveFindings():
+    # Loop to get input
+    while True:
+        print("\nFINDINGS: (L)ist / (I)nsert / (D)elete / (B)ack")
+        # get some input
+        minput = input("Please enter your input choice:\n")
+        # if we catch a "bye" then exit
+        if (minput == "B" or minput == "b"):
+            break
+        elif (minput == "L" or minput == "l"):
+            findingsByProvider()
+            pass
+        elif (minput == "I" or minput == "i"):
+            insertOccurrence()
+            pass
+        elif (minput == "D" or minput == "d"):
+            deleteOccurrence()
+            pass
+        else:
+            print("wrong option")
+            pass
+
 def interactive():
     # Loop to get input
     while True:
-        print("\n(F)indings / (P)roviders / (D)elete finding / find (N)otes / e(X)it")
+        print("\n(F)indings / (P)roviders / (N)otes / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -104,13 +139,10 @@ def interactive():
             print('Bye...')
             break
         elif (minput == "F" or minput == "f"):
-            findingsByProvider()
+            interactiveFindings()
             pass
         elif (minput == "P" or minput == "p"):
             ListProviders()
-            pass
-        elif (minput == "D" or minput == "d"):
-            deleteOccurrence()
             pass
         elif (minput == "N" or minput == "n"):
             notesByProvider()
