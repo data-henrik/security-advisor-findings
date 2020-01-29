@@ -26,8 +26,7 @@ def loadAndInit(confFile=None):
     # Initialize the Watson Assistant client, use API V2
     if 'apikey' in configSecAdv:
         # Authentication via IAM
-        token_manager = IAMTokenManager("zvvErrJfqb9s15qFQq8OzjhCJka5q3DSwhVirDznqfW-")
-
+        token_manager = IAMTokenManager(configSecAdv["apikey"])
         configSecAdv["authToken"] = 'Bearer '+token_manager.request_token()['access_token']
     else:
         print('Expected apikey in credentials.')
