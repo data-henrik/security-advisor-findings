@@ -73,6 +73,20 @@ def findingsByProvider():
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
 
+def notesByProvider():
+    provinput = input("Please enter the provider ID:\n")
+    page_size=50
+    provider_id=provinput
+
+    try:
+        print("Searching notes")
+        notes = API_Notes_Instance.list_notes(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).notes
+        pprint(notes)
+
+    except ApiException as e:
+        print("Exception when calling APIs: %s\n" % e)
+
+
 def deleteOccurrence():
     provider_id = input("Please enter the provider ID:\n")
     occurrence_id = input("Please enter the occurrence ID:\n")
@@ -83,10 +97,10 @@ def deleteOccurrence():
 def interactive():
     # Loop to get input
     while True:
-        print("\n(F)indings / (P)roviders / (D)elete finding / e(X)it")
+        print("\n(F)indings / (P)roviders / (D)elete finding / find (N)otes / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
-        # if we catch a "bye" then exit after deleting the session
+        # if we catch a "bye" then exit
         if (minput == "x" or minput == "X"):
             print('Bye...')
             break
@@ -98,6 +112,9 @@ def interactive():
             pass
         elif (minput == "D" or minput == "d"):
             deleteOccurrence()
+            pass
+        elif (minput == "N" or minput == "n"):
+            notesByProvider()
             pass
         else:
             pass
