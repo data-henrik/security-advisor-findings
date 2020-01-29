@@ -1,0 +1,2 @@
+ibm-cloud-sdk-core>=1.6.0
+ibm-cloud-security-advisor-findingsapi-sdk

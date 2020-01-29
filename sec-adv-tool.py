@@ -14,6 +14,10 @@ configSecAdv={
     "authToken":None
 }
 
+SAConfiguration=None
+API_Notes_Instance=None
+API_Occurrence_Instance=None
+
 def loadAndInit(confFile=None):
     # Credentials are read from a file
     with open(confFile) as confFile:
@@ -28,6 +32,15 @@ def loadAndInit(confFile=None):
     else:
         print('Expected apikey in credentials.')
         exit
+    
+    global SAConfiguration
+    global API_Notes_Instance
+    global API_Occurrence_Instance
+    SAConfiguration = ibm_security_advisor_findings_api_client.Configuration()
+    SAConfiguration.host= configSecAdv["host"]
+
+    API_Notes_Instance = ibm_security_advisor_findings_api_client.FindingsNotesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration))
+    API_Occurrence_Instance = ibm_security_advisor_findings_api_client.FindingsOccurrencesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration)) 
 
 
 # Define parameters that we want to catch and some basic command help
@@ -48,38 +61,43 @@ def ListProviders():
 
 def findingsByProvider():
     provinput = input("Please enter the provider ID:\n")
-    configuration = ibm_security_advisor_findings_api_client.Configuration()
-    configuration.host= "https://us-south.secadvisor.cloud.ibm.com/findings"
-
-    api_findings_instance = ibm_security_advisor_findings_api_client.FindingsNotesApi(ibm_security_advisor_findings_api_client.ApiClient(configuration))
-    api_occurrence_instance = ibm_security_advisor_findings_api_client.FindingsOccurrencesApi(ibm_security_advisor_findings_api_client.ApiClient(configuration)) 
     page_size=50
     provider_id=provinput
 
 
     try:
         print("Searching occurrences")
-        occurrences = api_occurrence_instance.list_occurrences(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).occurrences
+        occurrences = API_Occurrence_Instance.list_occurrences(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).occurrences
         pprint(occurrences)
 
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
 
+def deleteOccurrence():
+    provider_id = input("Please enter the provider ID:\n")
+    occurrence_id = input("Please enter the occurrence ID:\n")
+
+    api_response = API_Occurrence_Instance.delete_occurrence(configSecAdv["account_id"],configSecAdv["authToken"],provider_id, occurrence_id)
+    pprint(api_response)
+
 def interactive():
     # Loop to get input
     while True:
-        print("(F)indings / (P)rovider / e(X)it")
+        print("\n(F)indings / (P)roviders / (D)elete finding / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit after deleting the session
         if (minput == "x" or minput == "X"):
             print('Bye...')
             break
-        elif (minput == "F"):
+        elif (minput == "F" or minput == "f"):
             findingsByProvider()
             pass
-        elif (minput == "P"):
+        elif (minput == "P" or minput == "p"):
             ListProviders()
+            pass
+        elif (minput == "D" or minput == "d"):
+            deleteOccurrence()
             pass
         else:
             pass
