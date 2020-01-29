@@ -1,0 +1,5 @@
+{
+    "apikey":"your IBM Cloud API key",
+    "account_id":"your IBM Cloud account ID",
+    "host":"https://us-south.secadvisor.cloud.ibm.com/findings"
+}
