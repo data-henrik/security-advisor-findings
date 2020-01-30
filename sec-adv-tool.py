@@ -17,6 +17,10 @@ configSecAdv={
 SAConfiguration=None
 API_Notes_Instance=None
 API_Occurrence_Instance=None
+API_Graph_Instance=None
+
+def id_generator(size=6, chars=string.digits):
+    return ''.join(random.choice(chars) for x in range(size))
 
 def loadAndInit(confFile=None):
     # Credentials are read from a file
@@ -35,11 +39,13 @@ def loadAndInit(confFile=None):
     global SAConfiguration
     global API_Notes_Instance
     global API_Occurrence_Instance
+    global API_Graph_Instance
     SAConfiguration = ibm_security_advisor_findings_api_client.Configuration()
     SAConfiguration.host= configSecAdv["host"]
 
     API_Notes_Instance = ibm_security_advisor_findings_api_client.FindingsNotesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration))
     API_Occurrence_Instance = ibm_security_advisor_findings_api_client.FindingsOccurrencesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration)) 
+    API_Graph_Instance = ibm_security_advisor_findings_api_client.FindingsGraphApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration))
 
 
 # Define parameters that we want to catch and some basic command help
@@ -56,7 +62,7 @@ def initParser(args=None):
 def ListProviders():
     headers = { "Authorization" : configSecAdv["authToken"], "Content-Type" : "application/json" }
     response  = requests.get( configSecAdv["host"]+"/v1/"+configSecAdv["account_id"]+"/providers/", headers=headers )
-    pprint (response.json())
+    pprint (response.json(), indent=2)
 
 def findingsByProvider():
     provinput = input("Please enter the provider ID:\n")
@@ -67,7 +73,7 @@ def findingsByProvider():
     try:
         print("Searching occurrences")
         occurrences = API_Occurrence_Instance.list_occurrences(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).occurrences
-        pprint(occurrences)
+        pprint(occurrences, indent=2)
 
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
@@ -80,10 +86,21 @@ def notesByProvider():
     try:
         print("Searching notes")
         notes = API_Notes_Instance.list_notes(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).notes
-        pprint(notes)
+        pprint(notes, indent=2)
 
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
+
+def deleteNote():
+    provider_id = input("Please enter the provider ID:\n")
+    note_id = input("Please enter the note ID:\n")
+    try:
+        # Deletes the given `Note` from the system.
+        api_response = API_Notes_Instance.delete_note(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, note_id)
+        pprint(api_response)
+    except ApiException as e:
+        print("Exception when calling FindingsNotesApi->delete_note: %s\n" % e)
+
 
 def insertOccurrence():
     provider_id = input("Please enter the provider ID:\n")
@@ -91,12 +108,16 @@ def insertOccurrence():
     
     with open(fileInput) as occFile:
         newOcc=json.load(occFile)
-    if newOcc["provider_id"] != provider_id:
-        print("Warning: Provider IDs do not match...")
+    #if newOcc["provider_id"] != provider_id:
+    #    print("Warning: Provider IDs do not match...")
+
+    temp={"id":id_generator(), "note_name":configSecAdv["account_id"]+"/providers/" + provider_id + "/notes/"+"hl-test-finding"}
+    newOcc.update(temp)
+    pprint(newOcc, indent=2)
 
     print("Creating TEST occurrence")
     api_response = API_Occurrence_Instance.create_occurrence(newOcc, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
-    pprint(api_response)
+    pprint(api_response, indent=2)
     print("Created TEST occurrence")
 
 def deleteOccurrence():
@@ -104,12 +125,22 @@ def deleteOccurrence():
     occurrence_id = input("Please enter the occurrence ID:\n")
 
     api_response = API_Occurrence_Instance.delete_occurrence(configSecAdv["account_id"],configSecAdv["authToken"],provider_id, occurrence_id)
-    pprint(api_response)
+    pprint(api_response, indent=2)
+
+def queryGraph():
+    qbody = input("Please enter the query body:\n")
+
+    try:
+        # query findings
+        api_response = API_Graph_Instance.post_graph(qbody, configSecAdv["authToken"], configSecAdv["account_id"])
+        pprint(api_response, indent=2)
+    except ApiException as e:
+        print("Exception when calling FindingsGraphApi->post_graph: %s\n" % e)
 
 def interactiveFindings():
     # Loop to get input
     while True:
-        print("\nFINDINGS: (L)ist / (I)nsert / (D)elete / (B)ack")
+        print("\n\nFINDINGS: (L)ist / (C)reate / (D)elete / (B)ack")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -118,7 +149,7 @@ def interactiveFindings():
         elif (minput == "L" or minput == "l"):
             findingsByProvider()
             pass
-        elif (minput == "I" or minput == "i"):
+        elif (minput == "C" or minput == "c"):
             insertOccurrence()
             pass
         elif (minput == "D" or minput == "d"):
@@ -128,10 +159,33 @@ def interactiveFindings():
             print("wrong option")
             pass
 
+def interactiveNotes():
+    # Loop to get input
+    while True:
+        print("\n\nNOTES: (L)ist / (C)reate / (D)elete / (B)ack")
+        # get some input
+        minput = input("Please enter your input choice:\n")
+        # if we catch a "bye" then exit
+        if (minput == "B" or minput == "b"):
+            break
+        elif (minput == "L" or minput == "l"):
+            notesByProvider()
+            pass
+        #elif (minput == "I" or minput == "i"):
+        #    insertOccurrence()
+        #    pass
+        elif (minput == "D" or minput == "d"):
+            deleteNote()
+            pass
+        else:
+            print("wrong option")
+            pass
+
+
 def interactive():
     # Loop to get input
     while True:
-        print("\n(F)indings / (P)roviders / (N)otes / e(X)it")
+        print("\n\n(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -145,7 +199,10 @@ def interactive():
             ListProviders()
             pass
         elif (minput == "N" or minput == "n"):
-            notesByProvider()
+            interactiveNotes()
+            pass
+        elif (minput == "G" or minput == "g"):
+            queryGraph()
             pass
         else:
             pass
