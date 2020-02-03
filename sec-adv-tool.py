@@ -101,6 +101,18 @@ def deleteNote():
     except ApiException as e:
         print("Exception when calling FindingsNotesApi->delete_note: %s\n" % e)
 
+def createNote():
+    provider_id = input("Please enter the provider ID:\n")
+    fileInput = input("Enter the filename with the note to create:\n")
+    with open(fileInput) as noteFile:
+        newNote=json.load(noteFile)
+    newNote["provider_id"]=provider_id
+    try:
+        api_response = API_Notes_Instance.create_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
+        pprint(api_response, indent=2)
+    except ApiException as e:
+        print("Exception when calling APIs: %s\n" % e)
+
 
 def insertOccurrence():
     provider_id = input("Please enter the provider ID:\n")
@@ -171,9 +183,9 @@ def interactiveNotes():
         elif (minput == "L" or minput == "l"):
             notesByProvider()
             pass
-        #elif (minput == "I" or minput == "i"):
-        #    insertOccurrence()
-        #    pass
+        elif (minput == "C" or minput == "c"):
+            createNote()
+            pass
         elif (minput == "D" or minput == "d"):
             deleteNote()
             pass

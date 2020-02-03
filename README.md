@@ -2,6 +2,7 @@
 This is a small tool to interactively
 - search for providers of notes and findings,
 - search for notes by a specific provider,
+- create a note (or card),
 - delete an individual note,
 - search for findings by a specific provider,
 - create a new finding (occurrence),
