@@ -1,0 +1,24 @@
+{
+    "kind": "FINDING",
+    "short_description": "Inactive user(s) in account",
+    "long_description": "Non-active users listed in account",
+    "provider_id": "data_henrik",
+    "id": "inactiveUsers",
+    "reported_by": {
+        "id": "HLSecScanner",
+        "title": "IAMUserScanner"
+    },
+    "finding": {
+        "severity": "HIGH",
+        "next_steps": [{
+            "title": "Go to account user management",
+            "url": "https://cloud.ibm.com/iam/users"
+        },
+        {
+            "title": "Visit account user management"
+        },
+        {
+            "title": "Validate and remove non-active users"
+        }]
+    }
+}

@@ -52,10 +52,10 @@ def loadAndInit(confFile=None):
 def initParser(args=None):
     parser = argparse.ArgumentParser(description='Manage findings for IBM Cloud Security Advisor',
                                      prog='sec-adv-tool.py',
-                                     usage='%(prog)s [-h | -interactive | -findings ] [options]')
-    parser.add_argument("-interactive",dest='interactive', action='store_true', help='interactive mode')
-    parser.add_argument("-findings",dest='findings', action='store_true', help='search findings')
-    parser.add_argument("-config",dest='confFile', default='config.json', help='configuration file')
+                                     usage='%(prog)s [-h | --interactive | --findings ] [options]')
+    parser.add_argument("--interactive",dest='interactive', action='store_true', help='interactive mode')
+    parser.add_argument("--findings",dest='findings', action='store_true', help='search findings')
+    parser.add_argument("--config",dest='confFile', default='config.json', help='configuration file')
 
     return parser
 
@@ -92,6 +92,7 @@ def notesByProvider():
         print("Exception when calling APIs: %s\n" % e)
 
 def deleteNote():
+    print("\nDELETE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
     note_id = input("Please enter the note ID:\n")
     try:
@@ -102,19 +103,36 @@ def deleteNote():
         print("Exception when calling FindingsNotesApi->delete_note: %s\n" % e)
 
 def createNote():
+    print("\nCREATE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
     fileInput = input("Enter the filename with the note to create:\n")
     with open(fileInput) as noteFile:
         newNote=json.load(noteFile)
     newNote["provider_id"]=provider_id
+
     try:
         api_response = API_Notes_Instance.create_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
         pprint(api_response, indent=2)
     except ApiException as e:
         print("Exception when calling APIs: %s\n" % e)
 
+def updateNote():
+    print("\nUPDATE A NOTE")
+    provider_id = input("Please enter the provider ID:\n")
+    note_id = input("Please enter the note ID:\n")
+    fileInput = input("Enter the filename with the note to update:\n")
+    with open(fileInput) as noteFile:
+        newNote=json.load(noteFile)
+    newNote["provider_id"]=provider_id
+
+    try:
+        api_response = API_Notes_Instance.update_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id, note_id)
+        pprint(api_response, indent=2)
+    except ApiException as e:
+        print("Exception when calling APIs: %s\n" % e)
 
 def insertOccurrence():
+    print("\nCREATE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
     fileInput = input("Enter the filename with findings occurrence to insert:\n")
     
@@ -133,6 +151,7 @@ def insertOccurrence():
     print("Created TEST occurrence")
 
 def deleteOccurrence():
+    print("\nDELETE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
     occurrence_id = input("Please enter the occurrence ID:\n")
 
@@ -152,7 +171,7 @@ def queryGraph():
 def interactiveFindings():
     # Loop to get input
     while True:
-        print("\n\nFINDINGS: (L)ist / (C)reate / (D)elete / (B)ack")
+        print("\n\n\nFINDINGS: (L)ist / (C)reate / (D)elete / (B)ack")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -174,7 +193,7 @@ def interactiveFindings():
 def interactiveNotes():
     # Loop to get input
     while True:
-        print("\n\nNOTES: (L)ist / (C)reate / (D)elete / (B)ack")
+        print("\n\n\nNOTES: (L)ist / (C)reate / (U)pdate / (D)elete / (B)ack")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -185,6 +204,9 @@ def interactiveNotes():
             pass
         elif (minput == "C" or minput == "c"):
             createNote()
+            pass
+        elif (minput == "U" or minput == "u"):
+            updateNote()
             pass
         elif (minput == "D" or minput == "d"):
             deleteNote()
@@ -197,7 +219,7 @@ def interactiveNotes():
 def interactive():
     # Loop to get input
     while True:
-        print("\n\n(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
+        print("\n\n\n(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit

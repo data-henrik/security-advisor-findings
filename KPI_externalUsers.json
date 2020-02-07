@@ -1,0 +1,14 @@
+{
+    "id": "externalUsersKPI",
+    "kind": "KPI",
+    "kpi": {
+      "aggregation_type": "SUM"
+    },
+    "long_description": "external users",
+    "provider_id": "data_henrik",
+    "reported_by": {
+      "id": "HLSecScanner",
+      "title": "IAM Scan"
+    },
+    "short_description": "external users"
+  }

@@ -1,0 +1,24 @@
+{
+    "kind": "FINDING",
+    "short_description": "External user(s) in account",
+    "long_description": "External user(s) have access to the account",
+    "provider_id": "data_henrik",
+    "id": "externalUsers",
+    "reported_by": {
+        "id": "HLSecScanner",
+        "title": "IAMUserScanner"
+    },
+    "finding": {
+        "severity": "HIGH",
+        "next_steps": [{
+            "title": "Go to account user management",
+            "url": "https://cloud.ibm.com/iam/users"
+        },
+        {
+            "title": "Visit account user management"
+        },
+        {
+            "title": "Remove external user(s)"
+        }]
+    }
+}

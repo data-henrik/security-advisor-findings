@@ -12,4 +12,6 @@ The tool is used to explore the Python SDK (https://github.com/ibm-cloud-securit
 
 1. Install the requirements.
 2. Create a `config.json` to hold an API key and the account ID.
-3. Launch `python3 sec-adv-findings.py -interactive`.
+3. Launch `python3 sec-adv-findings.py --interactive`.
+
+If you want to pass in a different configuration file, e.g., if you work with multiple environments, then utilize the `--config` option.
