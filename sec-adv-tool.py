@@ -77,7 +77,7 @@ def deleteNote():
 
     # Deletes the given `Note` from the system.
     response=Findings_API.delete_note(configSecAdv["account_id"], provider_id, note_id)
-    pprint(response, indent=2)
+    pprint(response.result, indent=2)
 
 def createNote():
     print("\nCREATE A NOTE")
@@ -87,24 +87,19 @@ def createNote():
         newNote=json.load(noteFile)
     newNote["provider_id"]=provider_id
 
-    #response=Findings_API.create_note(configSecAdv["account_id"], provider_id, newNote)
-    if newNote["kind"]=="CARD":
-        response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
+    response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
                              new_short_description=newNote["short_description"],
                              new_long_description=newNote["long_description"],
                              new_kind=newNote["kind"],
                              new_id=newNote["id"],
                              new_reported_by=newNote["reported_by"],
-                             new_card=newNote["card"])
-    elif newNote["kind"]=="FINDING":
-        response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
-                             new_short_description=newNote["short_description"],
-                             new_long_description=newNote["long_description"],
-                             new_kind=newNote["kind"],
-                             new_id=newNote["id"],
-                             new_reported_by=newNote["reported_by"],
-                             new_finding=newNote["finding"])
-    pprint(response, indent=2)
+                             new_card=(newNote["card"] if "card" in newNote else None),
+                             new_finding=(newNote["finding"] if "finding" in newNote else None),
+                             new_kpi=(newNote["kpi"] if "kpi" in newNote else None),
+                             new_section=(newNote["section"] if "section" in newNote else None),
+                             new_shared=("shared" in newNote)
+                             )
+    pprint(response.result, indent=2)
 
 # def updateNote():
 #     print("\nUPDATE A NOTE")
@@ -121,25 +116,33 @@ def createNote():
 #     except ApiException as e:
 #         print("Exception when calling APIs: %s\n" % e)
 
-""" def insertOccurrence():
+def insertOccurrence():
     print("\nCREATE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
     fileInput = input("Enter the filename with findings occurrence to insert:\n")
     
     with open(fileInput) as occFile:
         newOcc=json.load(occFile)
-    #if newOcc["provider_id"] != provider_id:
-    #    print("Warning: Provider IDs do not match...")
-
-    temp={"id":id_generator(), "note_name":configSecAdv["account_id"]+"/providers/" + provider_id + "/notes/"+"hl-test-finding"}
-    newOcc.update(temp)
+    newOcc["provider_id"]=provider_id
+    
+    temp_id=id_generator()
+    temp_note_name=configSecAdv["account_id"]+"/providers/" + provider_id + "/notes/"+newOcc["name"]
     pprint(newOcc, indent=2)
 
-    print("Creating TEST occurrence")
-    api_response = API_Occurrence_Instance.create_occurrence(newOcc, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
-    pprint(api_response, indent=2)
-    print("Created TEST occurrence")
- """
+    print("Creating occurrence")
+    response=Findings_API.create_occurrence(configSecAdv["account_id"], provider_id,
+                                            new_note_name=temp_note_name,
+                                            new_id=temp_id,
+                                            new_kind=newOcc["kind"],
+                                            new_finding=(newOcc["finding"] if "finding" in newOcc else None),
+                                            new_kpi=(newOcc["kpi"] if "kpi" in newOcc else None),
+                                            new_remediation=(newOcc["remediation"] if "remediation" in newOcc else None),
+                                            replace_if_exists=(newOcc["replace_if_exists"] if "replace_if_exists" in newOcc else None),
+                                            new_context=(newOcc["context"] if "context" in newOcc else None),
+                                            new_resource_url=None
+    )
+    pprint(response.result, indent=2)
+
 def deleteOccurrence():
     print("\nDELETE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
