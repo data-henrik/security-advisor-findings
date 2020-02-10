@@ -1,9 +1,8 @@
 import json, argparse, importlib, requests
 from os.path import join, dirname
+from ibm_security_advisor_findings_api_sdk import FindingsApiV1 
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 import time
-import ibm_security_advisor_findings_api_client
-from ibm_security_advisor_findings_api_client.rest import ApiException
 from ibm_cloud_sdk_core import IAMTokenManager, ApiException
 from pprint import pprint
 
@@ -15,9 +14,7 @@ configSecAdv={
 }
 
 SAConfiguration=None
-API_Notes_Instance=None
-API_Occurrence_Instance=None
-API_Graph_Instance=None
+Findings_API=None
 
 def id_generator(size=6, chars=string.digits):
     return ''.join(random.choice(chars) for x in range(size))
@@ -30,23 +27,16 @@ def loadAndInit(confFile=None):
     # Initialize the Watson Assistant client, use API V2
     if 'apikey' in configSecAdv:
         # Authentication via IAM
-        token_manager = IAMTokenManager(configSecAdv["apikey"])
-        configSecAdv["authToken"] = 'Bearer '+token_manager.request_token()['access_token']
+        authenticator=IAMAuthenticator(configSecAdv["apikey"])
+        #configSecAdv["authToken"] = 'Bearer '+token_manager.request_token()['access_token']
     else:
         print('Expected apikey in credentials.')
         exit
     
     global SAConfiguration
-    global API_Notes_Instance
-    global API_Occurrence_Instance
-    global API_Graph_Instance
-    SAConfiguration = ibm_security_advisor_findings_api_client.Configuration()
-    SAConfiguration.host= configSecAdv["host"]
-
-    API_Notes_Instance = ibm_security_advisor_findings_api_client.FindingsNotesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration))
-    API_Occurrence_Instance = ibm_security_advisor_findings_api_client.FindingsOccurrencesApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration)) 
-    API_Graph_Instance = ibm_security_advisor_findings_api_client.FindingsGraphApi(ibm_security_advisor_findings_api_client.ApiClient(SAConfiguration))
-
+    global Findings_API
+    Findings_API=FindingsApiV1(authenticator=authenticator)
+    Findings_API.set_service_url(configSecAdv["host"])
 
 # Define parameters that we want to catch and some basic command help
 def initParser(args=None):
@@ -60,47 +50,34 @@ def initParser(args=None):
     return parser
 
 def ListProviders():
-    headers = { "Authorization" : configSecAdv["authToken"], "Content-Type" : "application/json" }
-    response  = requests.get( configSecAdv["host"]+"/v1/"+configSecAdv["account_id"]+"/providers/", headers=headers )
-    pprint (response.json(), indent=2)
+    response=Findings_API.list_providers(configSecAdv["account_id"])
+    pprint (response.result, indent=2)
 
 def findingsByProvider():
     provinput = input("Please enter the provider ID:\n")
     page_size=50
     provider_id=provinput
-
-
-    try:
-        print("Searching occurrences")
-        occurrences = API_Occurrence_Instance.list_occurrences(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).occurrences
-        pprint(occurrences, indent=2)
-
-    except ApiException as e:
-        print("Exception when calling APIs: %s\n" % e)
+    print("Searching findings by provider")
+    response=Findings_API.list_occurrences(configSecAdv["account_id"],provider_id, page_size=page_size)
+    pprint(response.result, indent=2)
 
 def notesByProvider():
     provinput = input("Please enter the provider ID:\n")
     page_size=50
     provider_id=provinput
+    print("Searching notes")
+    response=Findings_API.list_notes(configSecAdv["account_id"], provider_id, page_size=page_size)
+    pprint(response.result, indent=2)
 
-    try:
-        print("Searching notes")
-        notes = API_Notes_Instance.list_notes(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, page_size=page_size).notes
-        pprint(notes, indent=2)
-
-    except ApiException as e:
-        print("Exception when calling APIs: %s\n" % e)
 
 def deleteNote():
     print("\nDELETE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
     note_id = input("Please enter the note ID:\n")
-    try:
-        # Deletes the given `Note` from the system.
-        api_response = API_Notes_Instance.delete_note(configSecAdv["account_id"],configSecAdv["authToken"], provider_id, note_id)
-        pprint(api_response)
-    except ApiException as e:
-        print("Exception when calling FindingsNotesApi->delete_note: %s\n" % e)
+
+    # Deletes the given `Note` from the system.
+    response=Findings_API.delete_note(configSecAdv["account_id"], provider_id, note_id)
+    pprint(response, indent=2)
 
 def createNote():
     print("\nCREATE A NOTE")
@@ -110,28 +87,41 @@ def createNote():
         newNote=json.load(noteFile)
     newNote["provider_id"]=provider_id
 
-    try:
-        api_response = API_Notes_Instance.create_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
-        pprint(api_response, indent=2)
-    except ApiException as e:
-        print("Exception when calling APIs: %s\n" % e)
+    #response=Findings_API.create_note(configSecAdv["account_id"], provider_id, newNote)
+    if newNote["kind"]=="CARD":
+        response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
+                             new_short_description=newNote["short_description"],
+                             new_long_description=newNote["long_description"],
+                             new_kind=newNote["kind"],
+                             new_id=newNote["id"],
+                             new_reported_by=newNote["reported_by"],
+                             new_card=newNote["card"])
+    elif newNote["kind"]=="FINDING":
+        response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
+                             new_short_description=newNote["short_description"],
+                             new_long_description=newNote["long_description"],
+                             new_kind=newNote["kind"],
+                             new_id=newNote["id"],
+                             new_reported_by=newNote["reported_by"],
+                             new_finding=newNote["finding"])
+    pprint(response, indent=2)
 
-def updateNote():
-    print("\nUPDATE A NOTE")
-    provider_id = input("Please enter the provider ID:\n")
-    note_id = input("Please enter the note ID:\n")
-    fileInput = input("Enter the filename with the note to update:\n")
-    with open(fileInput) as noteFile:
-        newNote=json.load(noteFile)
-    newNote["provider_id"]=provider_id
+# def updateNote():
+#     print("\nUPDATE A NOTE")
+#     provider_id = input("Please enter the provider ID:\n")
+#     note_id = input("Please enter the note ID:\n")
+#     fileInput = input("Enter the filename with the note to update:\n")
+#     with open(fileInput) as noteFile:
+#         newNote=json.load(noteFile)
+#     newNote["provider_id"]=provider_id
 
-    try:
-        api_response = API_Notes_Instance.update_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id, note_id)
-        pprint(api_response, indent=2)
-    except ApiException as e:
-        print("Exception when calling APIs: %s\n" % e)
+    
+#     response=Findings_API.update_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id, note_id)
+#         pprint(api_response, indent=2)
+#     except ApiException as e:
+#         print("Exception when calling APIs: %s\n" % e)
 
-def insertOccurrence():
+""" def insertOccurrence():
     print("\nCREATE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
     fileInput = input("Enter the filename with findings occurrence to insert:\n")
@@ -149,24 +139,22 @@ def insertOccurrence():
     api_response = API_Occurrence_Instance.create_occurrence(newOcc, configSecAdv["authToken"], configSecAdv["account_id"], provider_id)
     pprint(api_response, indent=2)
     print("Created TEST occurrence")
-
+ """
 def deleteOccurrence():
     print("\nDELETE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
     occurrence_id = input("Please enter the occurrence ID:\n")
 
-    api_response = API_Occurrence_Instance.delete_occurrence(configSecAdv["account_id"],configSecAdv["authToken"],provider_id, occurrence_id)
-    pprint(api_response, indent=2)
+    response=Findings_API.delete_occurrence(configSecAdv["account_id"],provider_id, occurrence_id)
+    pprint(response.result, indent=2)
 
 def queryGraph():
     qbody = input("Please enter the query body:\n")
 
-    try:
-        # query findings
-        api_response = API_Graph_Instance.post_graph(qbody, configSecAdv["authToken"], configSecAdv["account_id"])
-        pprint(api_response, indent=2)
-    except ApiException as e:
-        print("Exception when calling FindingsGraphApi->post_graph: %s\n" % e)
+    content_type="application/graphql"
+    # query findings
+    response=Findings_API.post_graph(configSecAdv["account_id"], qbody, content_type=content_type)
+    pprint(response.result, indent=2)
 
 def interactiveFindings():
     # Loop to get input
@@ -180,10 +168,10 @@ def interactiveFindings():
         elif (minput == "L" or minput == "l"):
             findingsByProvider()
             pass
-        elif (minput == "C" or minput == "c"):
-            insertOccurrence()
-            pass
-        elif (minput == "D" or minput == "d"):
+        # elif (minput == "C" or minput == "c"):
+        #     insertOccurrence()
+        #     pass
+        # elif (minput == "D" or minput == "d"):
             deleteOccurrence()
             pass
         else:
@@ -205,9 +193,9 @@ def interactiveNotes():
         elif (minput == "C" or minput == "c"):
             createNote()
             pass
-        elif (minput == "U" or minput == "u"):
-            updateNote()
-            pass
+        # elif (minput == "U" or minput == "u"):
+        #     updateNote()
+        #     pass
         elif (minput == "D" or minput == "d"):
             deleteNote()
             pass
