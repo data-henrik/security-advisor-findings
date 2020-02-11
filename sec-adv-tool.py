@@ -88,33 +88,42 @@ def createNote():
     newNote["provider_id"]=provider_id
 
     response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
-                             new_short_description=newNote["short_description"],
-                             new_long_description=newNote["long_description"],
-                             new_kind=newNote["kind"],
-                             new_id=newNote["id"],
-                             new_reported_by=newNote["reported_by"],
-                             new_card=(newNote["card"] if "card" in newNote else None),
-                             new_finding=(newNote["finding"] if "finding" in newNote else None),
-                             new_kpi=(newNote["kpi"] if "kpi" in newNote else None),
-                             new_section=(newNote["section"] if "section" in newNote else None),
-                             new_shared=("shared" in newNote)
+                             short_description=newNote["short_description"],
+                             long_description=newNote["long_description"],
+                             kind=newNote["kind"],
+                             id=newNote["id"],
+                             reported_by=newNote["reported_by"],
+                             card=(newNote["card"] if "card" in newNote else None),
+                             finding=(newNote["finding"] if "finding" in newNote else None),
+                             kpi=(newNote["kpi"] if "kpi" in newNote else None),
+                             section=(newNote["section"] if "section" in newNote else None),
+                             shared=("shared" in newNote)
                              )
     pprint(response.result, indent=2)
 
-# def updateNote():
-#     print("\nUPDATE A NOTE")
-#     provider_id = input("Please enter the provider ID:\n")
-#     note_id = input("Please enter the note ID:\n")
-#     fileInput = input("Enter the filename with the note to update:\n")
-#     with open(fileInput) as noteFile:
-#         newNote=json.load(noteFile)
-#     newNote["provider_id"]=provider_id
+def updateNote():
+    print("\nUPDATE A NOTE")
+    provider_id = input("Please enter the provider ID:\n")
+    note_id = input("Please enter the note ID:\n")
+    fileInput = input("Enter the filename with the note to update:\n")
+    with open(fileInput) as noteFile:
+        newNote=json.load(noteFile)
+    newNote["provider_id"]=provider_id
 
     
-#     response=Findings_API.update_note(newNote, configSecAdv["authToken"], configSecAdv["account_id"], provider_id, note_id)
-#         pprint(api_response, indent=2)
-#     except ApiException as e:
-#         print("Exception when calling APIs: %s\n" % e)
+    response=Findings_API.update_note(configSecAdv["account_id"], provider_id, note_id,
+                             short_description=newNote["short_description"],
+                             long_description=newNote["long_description"],
+                             kind=newNote["kind"],
+                             id=newNote["id"],
+                             reported_by=newNote["reported_by"],
+                             card=(newNote["card"] if "card" in newNote else None),
+                             finding=(newNote["finding"] if "finding" in newNote else None),
+                             kpi=(newNote["kpi"] if "kpi" in newNote else None),
+                             section=(newNote["section"] if "section" in newNote else None),
+                             shared=("shared" in newNote)        )
+    pprint(response.result, indent=2)
+
 
 def insertOccurrence():
     print("\nCREATE A FINDING")
@@ -131,15 +140,15 @@ def insertOccurrence():
 
     print("Creating occurrence")
     response=Findings_API.create_occurrence(configSecAdv["account_id"], provider_id,
-                                            new_note_name=temp_note_name,
-                                            new_id=temp_id,
-                                            new_kind=newOcc["kind"],
-                                            new_finding=(newOcc["finding"] if "finding" in newOcc else None),
-                                            new_kpi=(newOcc["kpi"] if "kpi" in newOcc else None),
-                                            new_remediation=(newOcc["remediation"] if "remediation" in newOcc else None),
+                                            note_name=temp_note_name,
+                                            id=temp_id,
+                                            kind=newOcc["kind"],
+                                            finding=(newOcc["finding"] if "finding" in newOcc else None),
+                                            kpi=(newOcc["kpi"] if "kpi" in newOcc else None),
+                                            remediation=(newOcc["remediation"] if "remediation" in newOcc else None),
                                             replace_if_exists=(newOcc["replace_if_exists"] if "replace_if_exists" in newOcc else None),
-                                            new_context=(newOcc["context"] if "context" in newOcc else None),
-                                            new_resource_url=None
+                                            context=(newOcc["context"] if "context" in newOcc else None),
+                                            resource_url=None
     )
     pprint(response.result, indent=2)
 
@@ -171,10 +180,10 @@ def interactiveFindings():
         elif (minput == "L" or minput == "l"):
             findingsByProvider()
             pass
-        # elif (minput == "C" or minput == "c"):
-        #     insertOccurrence()
-        #     pass
-        # elif (minput == "D" or minput == "d"):
+        elif (minput == "C" or minput == "c"):
+            insertOccurrence()
+            pass
+        elif (minput == "D" or minput == "d"):
             deleteOccurrence()
             pass
         else:
@@ -196,9 +205,9 @@ def interactiveNotes():
         elif (minput == "C" or minput == "c"):
             createNote()
             pass
-        # elif (minput == "U" or minput == "u"):
-        #     updateNote()
-        #     pass
+        elif (minput == "U" or minput == "u"):
+            updateNote()
+            pass
         elif (minput == "D" or minput == "d"):
             deleteNote()
             pass
