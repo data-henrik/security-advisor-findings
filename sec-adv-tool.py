@@ -1,44 +1,59 @@
 # (C) 2020 IBM Corporation
 #
-# 
+# Use the Python SDK for the IBM Security Advisor Findings API to
+# manage Providers, Notes and Occurrences.
 #
+# Doc: https://cloud.ibm.com/docs/services/security-advisor?topic=security-advisor-setup_custom
+# API: https://cloud.ibm.com/apidocs/security-advisor/findings
+# SDK: https://github.com/ibm-cloud-security/security-advisor-findings-sdk-python
 
 
-import json, requests, os
-from os.path import join, dirname
+import json, os
 from ibm_security_advisor_findings_api_sdk import FindingsApiV1 
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-import time
-from ibm_cloud_sdk_core import IAMTokenManager, ApiException
 from pprint import pprint
 from dotenv import load_dotenv
 
-
+# For generating unique IDs
 import random
 import string
 
 Account_ID=None
 Findings_API=None
 
+# Generate unique ID, needed for finding occurrences
 def id_generator(size=6, chars=string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
+# Set up environment by reading env variables and initialising SDK
 def loadAndInit():
+    # load .env if available
     load_dotenv()
 
-    authenticator=IAMAuthenticator(os.getenv("SAT_APIKEY"))
+    # Account ID is needed for most API functions
     global Account_ID
     Account_ID=os.getenv("SAT_ACCOUNT_ID")
-
+    # SDK instance
     global Findings_API
+
+    # initialize IAM authentication based on API key
+    authenticator=IAMAuthenticator(os.getenv("SAT_APIKEY"))
+    # initialize API / SDK
     Findings_API=FindingsApiV1(authenticator=authenticator)
     Findings_API.set_service_url(os.getenv("SAT_HOST"))
 
-
+# Obtain the list of available (visible) providers
 def ListProviders():
+    print("\nListing providers")
     response=Findings_API.list_providers(Account_ID)
     pprint (response.result, indent=2)
+    # if there is more data, fetch and print it
+    while (response.result["next_page_token"] != None):
+            response=Findings_API.list_providers(Account_ID, page_token=response.result["next_page_token"])
+            pprint(response.result, indent=2)
 
+# Obtain the list of all findings / occurrences
+# A provider ID needs to be typed in on the command line.
 def findingsByProvider():
     provinput = input("Please enter the provider ID:\n")
     page_size=50
@@ -46,7 +61,13 @@ def findingsByProvider():
     print("Searching findings by provider")
     response=Findings_API.list_occurrences(Account_ID,provider_id, page_size=page_size)
     pprint(response.result, indent=2)
+    # if there is more data, fetch and print it
+    while (response.result["next_page_token"] != ""):
+            response=Findings_API.list_occurrences(Account_ID, provider_id, page_size=page_size, page_token=response.result["next_page_token"])
+            pprint(response.result, indent=2)
 
+# Obtain the list of all notes (card, kpi, finding)
+# A provider ID needs to be typed in on the command line.
 def notesByProvider():
     provinput = input("Please enter the provider ID:\n")
     page_size=50
@@ -58,6 +79,7 @@ def notesByProvider():
             response=Findings_API.list_notes(Account_ID, provider_id, page_size=page_size, page_token=response.result["next_page_token"])
             pprint(response.result, indent=2)
 
+# Delete a note identified by provider and its ID
 def deleteNote():
     print("\nDELETE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
@@ -67,18 +89,22 @@ def deleteNote():
     response=Findings_API.delete_note(Account_ID, provider_id, note_id)
     pprint(response.result, indent=2)
 
+# Create a note (card, kpi, finding)
 def createNote():
     print("\nCREATE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
     fileInput = input("Enter the filename with the note to create:\n")
+    # Load the file
     with open(fileInput) as noteFile:
         newNote=json.load(noteFile)
+    
+    # Set the correct provider_id
     newNote["provider_id"]=provider_id
-
+    # Create the note based on file content
     response=Findings_API.create_note(Account_ID, **newNote)
-
     pprint(response.result, indent=2)
 
+# Update an existing note, similar to creating it
 def updateNote():
     print("\nUPDATE A NOTE")
     provider_id = input("Please enter the provider ID:\n")
@@ -88,11 +114,10 @@ def updateNote():
         newNote=json.load(noteFile)
     newNote["provider_id"]=provider_id
 
-    
     response=Findings_API.update_note(Account_ID,note_id=note_id, **newNote)
     pprint(response.result, indent=2)
 
-
+# Create / insert a new finding occurrence
 def insertOccurrence():
     print("\nCREATE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
@@ -101,15 +126,16 @@ def insertOccurrence():
     with open(fileInput) as occFile:
         newOcc=json.load(occFile)
     newOcc["provider_id"]=provider_id
-    
+    # Generate the occurrence ID
     temp_id=id_generator()
+    # Compose the note name based on account, provider and note ID
     temp_note_name=Account_ID+"/providers/" + provider_id + "/notes/"+newOcc["name"]
-    pprint(newOcc, indent=2)
-
+    
     print("Creating occurrence")
     response=Findings_API.create_occurrence(Account_ID, id=temp_id, note_name=temp_note_name, **newOcc)
     pprint(response.result, indent=2)
 
+# Delete an existing occurrence
 def deleteOccurrence():
     print("\nDELETE A FINDING")
     provider_id = input("Please enter the provider ID:\n")
@@ -118,6 +144,7 @@ def deleteOccurrence():
     response=Findings_API.delete_occurrence(Account_ID,provider_id, occurrence_id)
     pprint(response.result, indent=2)
 
+# Can be used for more advanced queries
 def queryGraph():
     qbody = input("Please enter the query body:\n")
 
@@ -126,6 +153,7 @@ def queryGraph():
     response=Findings_API.post_graph(Account_ID, qbody, content_type=content_type)
     pprint(response.result, indent=2)
 
+# Handle input to decide on action for Findings submenu
 def interactiveFindings():
     # Loop to get input
     while True:
@@ -148,6 +176,7 @@ def interactiveFindings():
             print("wrong option")
             pass
 
+# Handle input to decide on action for Notes submenu
 def interactiveNotes():
     # Loop to get input
     while True:
@@ -174,6 +203,7 @@ def interactiveNotes():
             pass
 
 
+# Handle input in "main" menu
 def interactive():
     # Loop to get input
     while True:
@@ -202,7 +232,7 @@ def interactive():
 
 
 #
-# Main program, for now just detect what function to call and invoke it
+# Main program, for now just load the environment and display our basic options menu
 #
 if __name__ == '__main__':
     loadAndInit()
