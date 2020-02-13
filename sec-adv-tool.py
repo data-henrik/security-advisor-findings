@@ -1,56 +1,42 @@
-import json, argparse, importlib, requests
+# (C) 2020 IBM Corporation
+#
+# 
+#
+
+
+import json, requests, os
 from os.path import join, dirname
 from ibm_security_advisor_findings_api_sdk import FindingsApiV1 
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 import time
 from ibm_cloud_sdk_core import IAMTokenManager, ApiException
 from pprint import pprint
+from dotenv import load_dotenv
+
 
 import random
 import string
 
-configSecAdv={
-    "authToken":None
-}
-
-SAConfiguration=None
+Account_ID=None
 Findings_API=None
 
 def id_generator(size=6, chars=string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
-def loadAndInit(confFile=None):
-    # Credentials are read from a file
-    with open(confFile) as confFile:
-        configSecAdv.update(json.load(confFile))
+def loadAndInit():
+    load_dotenv()
 
-    # Initialize the Watson Assistant client, use API V2
-    if 'apikey' in configSecAdv:
-        # Authentication via IAM
-        authenticator=IAMAuthenticator(configSecAdv["apikey"])
-        #configSecAdv["authToken"] = 'Bearer '+token_manager.request_token()['access_token']
-    else:
-        print('Expected apikey in credentials.')
-        exit
-    
-    global SAConfiguration
+    authenticator=IAMAuthenticator(os.getenv("SAT_APIKEY"))
+    global Account_ID
+    Account_ID=os.getenv("SAT_ACCOUNT_ID")
+
     global Findings_API
     Findings_API=FindingsApiV1(authenticator=authenticator)
-    Findings_API.set_service_url(configSecAdv["host"])
+    Findings_API.set_service_url(os.getenv("SAT_HOST"))
 
-# Define parameters that we want to catch and some basic command help
-def initParser(args=None):
-    parser = argparse.ArgumentParser(description='Manage findings for IBM Cloud Security Advisor',
-                                     prog='sec-adv-tool.py',
-                                     usage='%(prog)s [-h | --interactive | --findings ] [options]')
-    parser.add_argument("--interactive",dest='interactive', action='store_true', help='interactive mode')
-    parser.add_argument("--findings",dest='findings', action='store_true', help='search findings')
-    parser.add_argument("--config",dest='confFile', default='config.json', help='configuration file')
-
-    return parser
 
 def ListProviders():
-    response=Findings_API.list_providers(configSecAdv["account_id"])
+    response=Findings_API.list_providers(Account_ID)
     pprint (response.result, indent=2)
 
 def findingsByProvider():
@@ -58,7 +44,7 @@ def findingsByProvider():
     page_size=50
     provider_id=provinput
     print("Searching findings by provider")
-    response=Findings_API.list_occurrences(configSecAdv["account_id"],provider_id, page_size=page_size)
+    response=Findings_API.list_occurrences(Account_ID,provider_id, page_size=page_size)
     pprint(response.result, indent=2)
 
 def notesByProvider():
@@ -66,9 +52,11 @@ def notesByProvider():
     page_size=50
     provider_id=provinput
     print("Searching notes")
-    response=Findings_API.list_notes(configSecAdv["account_id"], provider_id, page_size=page_size)
+    response=Findings_API.list_notes(Account_ID, provider_id, page_size=page_size)
     pprint(response.result, indent=2)
-
+    while (response.result["next_page_token"] != ""):
+            response=Findings_API.list_notes(Account_ID, provider_id, page_size=page_size, page_token=response.result["next_page_token"])
+            pprint(response.result, indent=2)
 
 def deleteNote():
     print("\nDELETE A NOTE")
@@ -76,7 +64,7 @@ def deleteNote():
     note_id = input("Please enter the note ID:\n")
 
     # Deletes the given `Note` from the system.
-    response=Findings_API.delete_note(configSecAdv["account_id"], provider_id, note_id)
+    response=Findings_API.delete_note(Account_ID, provider_id, note_id)
     pprint(response.result, indent=2)
 
 def createNote():
@@ -87,18 +75,8 @@ def createNote():
         newNote=json.load(noteFile)
     newNote["provider_id"]=provider_id
 
-    response=Findings_API.create_note(configSecAdv["account_id"], provider_id,
-                             short_description=newNote["short_description"],
-                             long_description=newNote["long_description"],
-                             kind=newNote["kind"],
-                             id=newNote["id"],
-                             reported_by=newNote["reported_by"],
-                             card=(newNote["card"] if "card" in newNote else None),
-                             finding=(newNote["finding"] if "finding" in newNote else None),
-                             kpi=(newNote["kpi"] if "kpi" in newNote else None),
-                             section=(newNote["section"] if "section" in newNote else None),
-                             shared=("shared" in newNote)
-                             )
+    response=Findings_API.create_note(Account_ID, **newNote)
+
     pprint(response.result, indent=2)
 
 def updateNote():
@@ -111,17 +89,7 @@ def updateNote():
     newNote["provider_id"]=provider_id
 
     
-    response=Findings_API.update_note(configSecAdv["account_id"], provider_id, note_id,
-                             short_description=newNote["short_description"],
-                             long_description=newNote["long_description"],
-                             kind=newNote["kind"],
-                             id=newNote["id"],
-                             reported_by=newNote["reported_by"],
-                             card=(newNote["card"] if "card" in newNote else None),
-                             finding=(newNote["finding"] if "finding" in newNote else None),
-                             kpi=(newNote["kpi"] if "kpi" in newNote else None),
-                             section=(newNote["section"] if "section" in newNote else None),
-                             shared=("shared" in newNote)        )
+    response=Findings_API.update_note(Account_ID,note_id=note_id, **newNote)
     pprint(response.result, indent=2)
 
 
@@ -135,21 +103,11 @@ def insertOccurrence():
     newOcc["provider_id"]=provider_id
     
     temp_id=id_generator()
-    temp_note_name=configSecAdv["account_id"]+"/providers/" + provider_id + "/notes/"+newOcc["name"]
+    temp_note_name=Account_ID+"/providers/" + provider_id + "/notes/"+newOcc["name"]
     pprint(newOcc, indent=2)
 
     print("Creating occurrence")
-    response=Findings_API.create_occurrence(configSecAdv["account_id"], provider_id,
-                                            note_name=temp_note_name,
-                                            id=temp_id,
-                                            kind=newOcc["kind"],
-                                            finding=(newOcc["finding"] if "finding" in newOcc else None),
-                                            kpi=(newOcc["kpi"] if "kpi" in newOcc else None),
-                                            remediation=(newOcc["remediation"] if "remediation" in newOcc else None),
-                                            replace_if_exists=(newOcc["replace_if_exists"] if "replace_if_exists" in newOcc else None),
-                                            context=(newOcc["context"] if "context" in newOcc else None),
-                                            resource_url=None
-    )
+    response=Findings_API.create_occurrence(Account_ID, id=temp_id, note_name=temp_note_name, **newOcc)
     pprint(response.result, indent=2)
 
 def deleteOccurrence():
@@ -157,7 +115,7 @@ def deleteOccurrence():
     provider_id = input("Please enter the provider ID:\n")
     occurrence_id = input("Please enter the occurrence ID:\n")
 
-    response=Findings_API.delete_occurrence(configSecAdv["account_id"],provider_id, occurrence_id)
+    response=Findings_API.delete_occurrence(Account_ID,provider_id, occurrence_id)
     pprint(response.result, indent=2)
 
 def queryGraph():
@@ -165,7 +123,7 @@ def queryGraph():
 
     content_type="application/graphql"
     # query findings
-    response=Findings_API.post_graph(configSecAdv["account_id"], qbody, content_type=content_type)
+    response=Findings_API.post_graph(Account_ID, qbody, content_type=content_type)
     pprint(response.result, indent=2)
 
 def interactiveFindings():
@@ -247,18 +205,6 @@ def interactive():
 # Main program, for now just detect what function to call and invoke it
 #
 if __name__ == '__main__':
-    # initialize parser
-    parser = initParser()
-    parms =  parser.parse_args()
-    # enable next line to print parameters
-    # print parms
+    loadAndInit()
 
-    # load configuration and initialize Watson
-    loadAndInit(confFile=parms.confFile)
-
-    if (parms.interactive):
-        interactive()
-    elif (parms.findings):
-        findingsByProvider()
-    else:
-        parser.print_usage()
+    interactive()

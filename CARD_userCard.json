@@ -15,7 +15,8 @@
         "shared": true,
         "finding_note_names": [
             "providers/data_henrik/notes/externalUsers",
-            "providers/data_henrik/notes/inactiveUsers"
+            "providers/data_henrik/notes/inactiveUsers",
+            "providers/data_henrik/notes/logdna"
             ],
         "elements": [{
             "kind": "NUMERIC",
@@ -29,12 +30,21 @@
         {
             "kind": "NUMERIC",
             "text": "Inactive user IDs found",
-            "default_time_range": "3d",
+            "default_time_range": "4d",
             "value_type": {
                 "kind": "FINDING_COUNT",
                 "finding_note_names": [
                     "providers/data_henrik/notes/inactiveUsers"
                 ]
+            }
+        },
+        {
+            "kind": "NUMERIC",
+            "text": "Events found in LogDNA",
+            "value_type": {
+                "kind": "KPI",
+                "kpi_note_name": 
+                    "providers/data_henrik/notes/logdnaKPI"
             }
         }
         ],

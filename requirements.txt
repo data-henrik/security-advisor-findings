@@ -1,2 +1,3 @@
 ibm-cloud-sdk-core>=1.6.0
-ibm-cloud-security-advisor-findingsapi-sdk
+ibm-cloud-security-advisor-findingsapi-sdk>=2.0.0
+python-dotenv

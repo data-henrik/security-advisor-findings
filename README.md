@@ -11,7 +11,6 @@ This is a small tool to interactively
 The tool is used to explore the Python SDK (https://github.com/ibm-cloud-security/security-advisor-findings-sdk-python) and to facilitate testing of custom findings.
 
 1. Install the requirements.
-2. Create a `config.json` to hold an API key and the account ID.
-3. Launch `python3 sec-adv-findings.py --interactive`.
+2. Create a `.env` to hold an API key, the account ID and host URI. Or use environment variables.
+3. Launch `python3 sec-adv-findings.py`.
 
-If you want to pass in a different configuration file, e.g., if you work with multiple environments, then utilize the `--config` option.
