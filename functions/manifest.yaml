@@ -1,0 +1,25 @@
+packages:
+    security_findings:
+      version: 1.0
+      license: Apache-2.0
+      actions:
+        iamToken:
+          function: src/iam-token.py
+          runtime: python:3
+        iamGetExternalUsers:
+          function: src/iam-get-external-users.py
+          runtime: python:3
+        iamGetInactiveUsers:
+          function: src/iam-get-inactive-users.py
+          runtime: python:3
+        createFindingExternalUsers:
+            function: src/create-finding-external-users.py
+            runtime: python:3
+        createFindingInactiveUsers:
+            function: src/create-finding-inactive-users.py
+            runtime: python:3
+      sequences:
+        externalUsersSeq:
+          actions: iamToken, iamGetExternalUsers, createFindingExternalUsers
+        inactiveUsersSeq:
+          actions: iamToken, iamGetExternalUsers, createFindingExternalUsers

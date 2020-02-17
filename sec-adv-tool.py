@@ -40,16 +40,17 @@ def loadAndInit():
     authenticator=IAMAuthenticator(os.getenv("SAT_APIKEY"))
     # initialize API / SDK
     Findings_API=FindingsApiV1(authenticator=authenticator)
-    Findings_API.set_service_url(os.getenv("SAT_HOST"))
+    Findings_API.set_service_url(os.getenv("SAT_ENDPOINT"))
 
 # Obtain the list of available (visible) providers
 def ListProviders():
     print("\nListing providers")
-    response=Findings_API.list_providers(Account_ID)
+    page_size=50
+    response=Findings_API.list_providers(Account_ID,page_size=page_size)
     pprint (response.result, indent=2)
     # if there is more data, fetch and print it
     while (response.result["next_page_token"] != None):
-            response=Findings_API.list_providers(Account_ID, page_token=response.result["next_page_token"])
+            response=Findings_API.list_providers(Account_ID, page_size=page_size,page_token=response.result["next_page_token"])
             pprint(response.result, indent=2)
 
 # Obtain the list of all findings / occurrences
@@ -207,7 +208,7 @@ def interactiveNotes():
 def interactive():
     # Loop to get input
     while True:
-        print("\n\n\n(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
+        print("(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
@@ -228,6 +229,7 @@ def interactive():
             pass
         else:
             pass
+        print("\n")
 
 
 

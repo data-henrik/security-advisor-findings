@@ -1,0 +1,5 @@
+{
+    "account_id":"your account ID",
+    "host":"https://us-south.secadvisor.cloud.ibm.com/findings",
+    "email_domain": "ibm.com"
+}
