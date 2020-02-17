@@ -1,5 +1,6 @@
 {
     "account_id":"your account ID",
+    "provider_id": "provider_id_to_use",
     "host":"https://us-south.secadvisor.cloud.ibm.com/findings",
     "email_domain": "ibm.com"
 }

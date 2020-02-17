@@ -1,0 +1,14 @@
+{
+    "id": "logdnaKPI",
+    "kind": "KPI",
+    "kpi": {
+      "aggregation_type": "SUM"
+    },
+    "long_description": "we found something",
+    "provider_id": "data_henrik",
+    "reported_by": {
+      "id": "HLSecScanner",
+      "title": "IAM Scan"
+    },
+    "short_description": "logdna"
+  }

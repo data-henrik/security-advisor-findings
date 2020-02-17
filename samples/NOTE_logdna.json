@@ -1,0 +1,24 @@
+{
+    "kind": "FINDING",
+    "short_description": "LogDNA",
+    "long_description": "bla",
+    "provider_id": "data_henrik",
+    "id": "logdna",
+    "reported_by": {
+        "id": "HLSecScanner",
+        "title": "IAMUserScanner"
+    },
+    "finding": {
+        "severity": "MEDIUM",
+        "next_steps": [{
+            "title": "Yeah",
+            "url": "https://cloud.ibm.com/iam/users"
+        },
+        {
+            "title": "Visit account user management"
+        },
+        {
+            "title": "Remove external user(s)"
+        }]
+    }
+}

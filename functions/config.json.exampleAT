@@ -1,0 +1,19 @@
+{
+    "account_id":"your-account-id",
+    "provider_id": "provider_id_to_use",
+    "host":"https://us-south.secadvisor.cloud.ibm.com/findings",
+    "email_domain": "ibm.com",
+    "AT": [
+        {
+        "key":"export-api-key",
+        "query":"initiator.credential.type:apikey",
+        "numHours":24,
+        "region":"us-south"
+        },
+        {
+       "key":"export-api-key",
+       "query":"action:security-advisor.findings.write outcome:failure",
+       "numHours":24,
+       "region":"eu-de"}
+    ]
+}
