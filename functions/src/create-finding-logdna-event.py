@@ -36,6 +36,7 @@ kpi={
 
 def main(args):
     response={}
+    kpiResponse={}
     if len(args["logs"])>0:
         headers = { "Authorization" : "Bearer "+args["access_token"], "Content-Type" : "application/json",
                     "accept": "application/json",  "Replace-If-Exists":"true" }
@@ -51,7 +52,7 @@ def main(args):
         kpi["kpi"]["value"]=len(args["logs"])
         kpi["kpi"]["total"]=len(args["logs"])
         kpiResponse  = requests.post(url, headers=headers, json=kpi).json()
-    return {"findingResponse":response, "kpiResponse":kpiResponse, "finding":finding, "url":url}
+    return {"findingResponse":response, "kpiResponse":kpiResponse}
 
 
 if __name__ == "__main__":

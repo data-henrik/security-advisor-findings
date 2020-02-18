@@ -1,4 +1,9 @@
-import json,sys,os, requests
+# (C) 2020 IBM Corporation
+#
+# Requests are based on:
+# https://cloud.ibm.com/apidocs/security-advisor/findings
+
+import json,sys,requests
 
 
 finding={
@@ -36,13 +41,16 @@ kpi={
 
 def main(args):
     response={}
+    # check if there were external users found
     if len(args["users"])>0:
+        # if yes, fill the structures
         headers = { "Authorization" : "Bearer "+args["access_token"], "Content-Type" : "application/json",
                     "accept": "application/json",  "Replace-If-Exists":"true" }
         # Finding
         finding["note_name"]=args["config"]["account_id"]+"/providers/"+args["config"]["provider_id"]+"/notes/externalUsers"
         finding["provider_id"]=args["config"]["provider_id"]
         url=args["config"]["host"]+"/v1/"+args["config"]["account_id"]+"/providers/"+args["config"]["provider_id"]+"/occurrences"
+        # and send the request
         response  = requests.post(url, headers=headers, json=finding).json()
 
         # KPI
@@ -51,7 +59,16 @@ def main(args):
         kpi["kpi"]["value"]=len(args["users"])
         kpi["kpi"]["total"]=len(args["users"])
         kpiResponse  = requests.post(url, headers=headers, json=kpi).json()
-    return {"findingResponse":response, "kpiResponse":kpiResponse, "finding":finding, "url":url}
+    else:
+        # if there are no issues detected, we try to delete possibly existing occurrences
+        headers = { "Authorization" : "Bearer "+args["access_token"]}
+        url=args["config"]["host"]+"/v1/"+args["config"]["account_id"]+"/providers/"+args["config"]["provider_id"]+"/occurrences/externalUsers"
+        response  = requests.delete(url, headers=headers).json()
+
+        url=args["config"]["host"]+"/v1/"+args["config"]["account_id"]+"/providers/"+args["config"]["provider_id"]+"/occurrences/externalUsersKPI"
+        kpiResponse  = requests.delete(url, headers=headers).json()
+
+    return {"findingResponse":response, "kpiResponse":kpiResponse}
 
 
 if __name__ == "__main__":

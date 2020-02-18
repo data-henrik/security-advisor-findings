@@ -28,6 +28,6 @@ packages:
         externalUsersSeq:
           actions: iamToken, iamGetExternalUsers, createFindingExternalUsers
         inactiveUsersSeq:
-          actions: iamToken, iamGetExternalUsers, createFindingInactiveUsers
+          actions: iamToken, iamGetInactiveUsers, createFindingInactiveUsers
         LogDNASeq:
           actions: iamToken, logDNASearchEvents, createFindingLogDNAEvent
