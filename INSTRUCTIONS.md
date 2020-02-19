@@ -1,7 +1,7 @@
 # Instructions
 Follow these instructions to set up and work with both the provided interactive tool as well as the code for IBM Cloud Functions.
 
-## Interactive tool
+## Tool to manage Security Advisor objects
 A tool to work with objects of the IBM Cloud Security Advisor is located in the subdirectory [interactive-tool](/interactive-tool). You need to install necessary Python modules and configure environment variables in order to use it.
 
 ### Setup
@@ -50,11 +50,17 @@ You can verify the successful deployment of objects from the previous section by
 3. Enter **data_henrik** as provider ID. Next, the existing notes for the specified provider are printed.
 
 ## Cloud Functions
+Cloud Functions are used to perform our own security scans and thereafter to create custom findings when necessary. To work with the Cloud Functions code, switch into the directory [functions](/functions).
 
 ### Deploy
+To deploy the actions, follow these steps from within the [/functions](/functions) directory:
 
-1. Create IAM namespace
-2. deploy functions
+1. Create an IAM namespace:   
+   `ibmcloud fn namespace create SecurityFindings`
+2. Set the newly created namespace as default for the next commands.   
+   `ibmcloud fn property set --namespace SecurityFindings`
+3. Next, deploy the Cloud Functions package with its actions and sequences. The configuration for the objects is read from the file `manifest.yaml`.   
+   `ibmcloud fn deploy`
 
 
 
@@ -71,8 +77,39 @@ The deployed actions need access privileges to scan the account configuration an
 9. With the two assignments listed under **Access summary**, click on **Assign** to complete the process. The service ID for the Cloud Functions namespace has now the necessary privileges.
 
 ### LogDNA access
+You need at least one instance of Activity Tracker with LogDNA deployed in order to take advantage of the event scanner. Go to https://cloud.ibm.com/observe/activitytracker for the setup.
+1. Click on **View LogDNA** to launch the LogDNA dashboard.
+2. Click on the cog icon on the left to go to the settings menu. There, click on **ORGANIZATION**.
+3. Choose **API Keys**, then under **Service Keys** click to **Generate Service Key**.
+4. Copy the new API key. It is needed to configure the Cloud Function action which scans LogDNA entries. The API key is used to access [the Export API which can be used for LogDNA queries](https://www.ibm.com/cloud/blog/search-logdna-records-from-the-command-line).
 
 ### Run actions manually
+To run the actions manually, you should create a configuration file. 
+1. In the **functions** directory, copy over `config.json.example` into a new file, e.g., `config.json`.
+2. Edit the values for **account_id** and **provider_id**. You can obtain the account_id by running `ibmcloud account list`. Set **provider_id** to **data_henrik** because it is the value used in the sample objects created earlier.
+3. The **email_domain** is used to scan for external users. If set to `ibm.com`, all users with email addresses not ending on that value would be flagged as external.
+4. The value for **host** is one of the Security Advisor endpoints.
+
+To run the action which searches LogDNA for specific events, you need to provide a special Activity Tracker configuration. An example is provided in the file `config.json.exampleAT`. 
+- The JSON array **AT** has objects with the LogDNA API **key**
+- and the related instance **region**.
+- The value for **numHours** determines how many of the past hours to scan.
+- The **query** holds the search term which will be used.
+You can have multiple entries to search different instances or to perform several queries.
+
+**Run the actions**
+
+Assuming you have the configuration saved, you can run the actions similar to this:
+
+`ibmcloud fn action invoke security_findings/inactiveUsersSeq -r -P config.json`
+
+Instead of **inactiveUsersSeq** you can also run **externalUsersSeq** and **LogDNASeq**. Each action is actually a sequence of three individual actions: Obtain an IAM access token based on the provided API key, perform the scan, create or delete findings if necessary. The command above invokes the action and waits for the result (`-r`). The option `-P` is used to read the configuration parameters from the specified file. If no issue is found during the scan, you might see a result with a **404** message included. The reason is that the last action always tries to delete an existing finding if it is no longer needed.
+
+You can see the created findings in
+- the [IBM Cloud Security Advisor dashboard](https://cloud.ibm.com/security-advisor#/dashboard) or
+- in the [Security Advisor Findings overview](https://cloud.ibm.com/security-advisor#/findings).
+
+In case of problems you can check the [IBM Cloud Functions dashboard](https://cloud.ibm.com/functions/dashboard) for details of the invocation and error messages.
 
 ### Scheduled execution
-
+It is possible to set up scheduled runs of the individual scans. You can utilize [IBM Cloud Functions triggers](https://cloud.ibm.com/docs/openwhisk?topic=cloud-functions-triggers) to schedule invocations. Details are left to the reader... :)
