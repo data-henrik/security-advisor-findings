@@ -1,5 +1,8 @@
 # (C) 2020 IBM Corporation
 #
+# IBM Cloud Functions / OpenWhisk action to create or delete
+# a finding occurrence and related KPI
+#
 # Requests are based on:
 # https://cloud.ibm.com/apidocs/security-advisor/findings
 

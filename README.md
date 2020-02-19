@@ -6,4 +6,6 @@ This repository has code
 * for an [interactive tool](/interactive-tool) to work with Security Advisor objects,
 * to deploy sample [Cloud Functions](/functions) to scan for custom security events and create related findings in the Security Advisor.
   
+# Instructions
 
+The [setup and usage instructions](/INSTRUCTIONS.md) are provided in a separate document.

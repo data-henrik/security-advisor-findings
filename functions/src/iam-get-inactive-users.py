@@ -11,7 +11,7 @@ def getUsers(iam_token, account_id):
 def main(args):
     users=getUsers(args["access_token"], args["config"]["account_id"])
 
-    result={"users":users,
+    result={
             "access_token":args["access_token"],
             "config":args["config"],
             "inactiveUsers":[]

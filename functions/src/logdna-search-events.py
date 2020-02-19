@@ -1,5 +1,5 @@
-import json,sys,os, requests
-from datetime import timedelta, datetime, tzinfo, timezone
+import json,sys,requests
+from datetime import datetime
 
 # perform the actual search
 def getLogs(region, key, numHours, query):

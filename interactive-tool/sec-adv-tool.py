@@ -208,7 +208,7 @@ def interactiveNotes():
 def interactive():
     # Loop to get input
     while True:
-        print("(F)indings / (P)roviders / (N)otes / (G)raph / e(X)it")
+        print("(P)roviders / (N)otes / (F)indings / (G)raph / e(X)it")
         # get some input
         minput = input("Please enter your input choice:\n")
         # if we catch a "bye" then exit
