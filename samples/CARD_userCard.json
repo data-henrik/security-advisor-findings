@@ -23,29 +23,26 @@
             "text": "External user IDs found",
             "value_type": {
                 "kind": "KPI",
-                "kpi_note_name": 
-                    "providers/data_henrik/notes/externalUsersKPI"
+                "kpi_note_name": "providers/data_henrik/notes/externalUsersKPI"
             }
         },
         {
             "kind": "NUMERIC",
             "text": "Inactive user IDs found",
-            "default_time_range": "4d",
             "value_type": {
-                "kind": "FINDING_COUNT",
-                "finding_note_names": [
-                    "providers/data_henrik/notes/inactiveUsers"
-                ]
+                "kind": "KPI",
+                "kpi_note_name": "providers/data_henrik/notes/inactiveUsersKPI"
             }
         },
         {
-            "kind": "BREAKDOWN",
+            "kind": "TIME_SERIES",
             "text": "Events found in LogDNA",
+            "default_interval": "d",
+            "default_time_range": "4d",
             "value_types": [{
                 "kind": "FINDING_COUNT",
-                "finding_note_names": [
-                    "providers/data_henrik/notes/logdnaKPI"
-                ]
+                "text": "Errors",
+                "finding_note_names": ["providers/data_henrik/notes/logdna"]
             }]
         }],
         "badge_text":"No issues detected in AT with LogDNA",

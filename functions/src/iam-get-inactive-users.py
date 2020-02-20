@@ -1,4 +1,10 @@
-import json,sys,os, requests
+# (C) 2020 IBM Corporation
+#
+# IBM Cloud Functions / OpenWhisk action to scan for
+# inactive users within the account users (User Management)
+#
+# "inactive" is determined by state of not ACTIVE
+import json,sys,requests
 
 
 def getUsers(iam_token, account_id):
@@ -6,7 +12,6 @@ def getUsers(iam_token, account_id):
     headers = { "Authorization" : "Bearer "+iam_token }
     response = requests.get(url, headers=headers)
     return response.json()
-
 
 def main(args):
     users=getUsers(args["access_token"], args["config"]["account_id"])

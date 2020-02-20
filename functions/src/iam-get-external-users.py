@@ -1,4 +1,10 @@
-import json,sys,os, requests
+# (C) 2020 IBM Corporation
+#
+# IBM Cloud Functions / OpenWhisk action to scan for an
+# external user within the account users (User Management)
+#
+# "external" is determined by the configured email_domain
+import json,sys,requests
 
 def main(args):
     url     = "https://user-management.cloud.ibm.com/v2/accounts/"+args["config"]["account_id"]+"/users"

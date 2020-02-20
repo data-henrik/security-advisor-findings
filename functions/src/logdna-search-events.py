@@ -1,3 +1,12 @@
+# (C) 2020 IBM Corporation
+#
+# IBM Cloud Functions / OpenWhisk action to scan LogDNA
+# entries with the specified query strings.
+#
+# It is possible to specify multiple query entries and LogDNA
+# instances. The results are merged and reported back as a single list.
+# A LogDNA API key for the export API is needed to perform the search.
+
 import json,sys,requests
 from datetime import datetime
 

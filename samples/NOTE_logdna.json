@@ -1,7 +1,7 @@
 {
     "kind": "FINDING",
-    "short_description": "LogDNA",
-    "long_description": "bla",
+    "short_description": "LogDNA errors",
+    "long_description": "We found errors in LogDNA logs, indicating possible security problems",
     "provider_id": "data_henrik",
     "id": "logdna",
     "reported_by": {
@@ -11,14 +11,11 @@
     "finding": {
         "severity": "MEDIUM",
         "next_steps": [{
-            "title": "Yeah",
-            "url": "https://cloud.ibm.com/iam/users"
+            "title": "Errors in LogDNA log",
+            "url": "https://cloud.ibm.com/observe/activitytracker"
         },
         {
-            "title": "Visit account user management"
-        },
-        {
-            "title": "Remove external user(s)"
+            "title": "Review LogDNA logs"
         }]
     }
 }

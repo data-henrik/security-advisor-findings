@@ -1,4 +1,7 @@
-# Use the Cloud Functions API key to request a Bearer token
+# (C) 2020 IBM Corporation
+#
+# IBM Cloud Functions / OpenWhisk action to obtain an IAM Bearer token
+# from the Cloud Function API key for the given IAM namespace and service ID.
 import json,sys,os,requests
 
 def getAuthTokens(api_key):

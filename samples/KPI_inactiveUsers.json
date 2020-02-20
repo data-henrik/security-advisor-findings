@@ -1,0 +1,14 @@
+{
+    "id": "inactiveUsersKPI",
+    "kind": "KPI",
+    "kpi": {
+      "aggregation_type": "SUM"
+    },
+    "long_description": "inactive users",
+    "provider_id": "data_henrik",
+    "reported_by": {
+      "id": "HLSecScanner",
+      "title": "IAM Scan"
+    },
+    "short_description": "inactive users"
+  }

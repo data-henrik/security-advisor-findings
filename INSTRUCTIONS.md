@@ -35,7 +35,7 @@ Some findings have additional Key Performance Indicators (KPIs) associated. They
 1. From the notes menu by using (c)reate again.
 2. Enter **data_henrik** as provider.
 3. Use `../samples/KPI_externalUsers.json` as file input.
-4. Repeat the steps 1) to 3) and use `../samples/KPI_logdna.json` as file input for step 3).
+4. Repeat the steps 1) to 3) and use `../samples/KPI_logdna.json` and `../samples/KPI_inactivelUsers.json` as file input for step 3).
 
 To display findings in the Security Advisor dashboard, you need to define a card object.
 1. Still in the notes menu, (c)reate a note again.
