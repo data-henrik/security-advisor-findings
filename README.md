@@ -2,6 +2,7 @@
 
 The [IBM Cloud Security Advisor](https://cloud.ibm.com/security-advisor) allows for centralized security management. It offers a unified dashboard that alerts security administrators for an IBM Cloud account of issues and helps them in resolving the issues. The advisor supports the integration of third-party vendors as well as custom findings. Using a REST API or programming language SDKs, it is possible to manage your own security metrics - from creating incident types and events to displaying them on the unified dashboard. 
 
+![A single custom finding](screenshots/SecurityAdvisor_CustomFindings2.png)
 # Overview
 
 This repository has code

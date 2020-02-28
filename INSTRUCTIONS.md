@@ -113,7 +113,13 @@ You can see the created findings in
 
 In case of problems you can check the [IBM Cloud Functions dashboard](https://cloud.ibm.com/functions/dashboard) for details of the invocation and error messages.
 
+Findings in the dashboard:   
 ![Custom findings in IBM Cloud Security Advisor](/screenshots/SecurityAdvisor_CustomFindings.png)
+
+
+A single message after clicking on it in the findings overview:   
+![single finding with details](screenshots/SecurityAdvisor_CustomFindings2.png)
+
 
 ### Scheduled execution
 It is possible to set up scheduled runs of the individual scans. You can utilize [IBM Cloud Functions triggers](https://cloud.ibm.com/docs/openwhisk?topic=cloud-functions-triggers) to schedule invocations. Details are left to the reader... :)
