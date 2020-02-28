@@ -24,7 +24,7 @@ Once the setup is done, you can start the tool. After executing `python3 sec-adv
 You can type your choice as upper- or lowercase character and then confirm with ENTER. Depending on the function, your are presented with a submenu.
 
 ### Deploy objects
-To add custom findings to Security Advisor, you first need to define a new finding type. 
+To [add custom findings to Security Advisor](https://cloud.ibm.com/docs/services/security-advisor?topic=security-advisor-setup_custom), you first need to define a new finding type. 
 1. This is done in the (N)otes menu. 
 2. There, choose to (C)reate a new note.
 3. You are prompted for a provider ID. Enter **data_henrik** and hit ENTER.
@@ -55,6 +55,7 @@ Cloud Functions are used to perform our own security scans and thereafter to cre
 ### Deploy
 To deploy the actions, follow these steps from within the [/functions](/functions) directory:
 
+0. Make sure you are logged in and have the right region and resource group. Run `ibmcloud target` to confirm.
 1. Create an IAM namespace:   
    `ibmcloud fn namespace create SecurityFindings`
 2. Set the newly created namespace as default for the next commands.   
@@ -84,7 +85,8 @@ You need at least one instance of Activity Tracker with LogDNA deployed in order
 4. Copy the new API key. It is needed to configure the Cloud Function action which scans LogDNA entries. The API key is used to access [the Export API which can be used for LogDNA queries](https://www.ibm.com/cloud/blog/search-logdna-records-from-the-command-line).
 
 ### Run actions manually
-To run the actions manually, you should create a configuration file. 
+To run the actions manually, you need to [pass in parameters](https://cloud.ibm.com/docs/openwhisk?topic=cloud-functions-cli-plugin-functions-cli#cli_action_invoke). This can be done with key / value pairs on the command line or, more conveniently, by using a configuration file. We provide two example files. One can be used for the actions related to external or inactive accounts. The second has additional parameters for accessing and querying LogDNA. It could be used for the account actions, too, but would pass in unnecessary values, including API keys.
+
 1. In the **functions** directory, copy over `config.json.example` into a new file, e.g., `config.json`.
 2. Edit the values for **account_id** and **provider_id**. You can obtain the account_id by running `ibmcloud account list`. Set **provider_id** to **data_henrik** because it is the value used in the sample objects created earlier.
 3. The **email_domain** is used to scan for external users. If set to `ibm.com`, all users with email addresses not ending on that value would be flagged as external.
@@ -110,6 +112,8 @@ You can see the created findings in
 - in the [Security Advisor Findings overview](https://cloud.ibm.com/security-advisor#/findings).
 
 In case of problems you can check the [IBM Cloud Functions dashboard](https://cloud.ibm.com/functions/dashboard) for details of the invocation and error messages.
+
+![Custom findings in IBM Cloud Security Advisor](/screenshots/SecurityAdvisor_CustomFindings.png)
 
 ### Scheduled execution
 It is possible to set up scheduled runs of the individual scans. You can utilize [IBM Cloud Functions triggers](https://cloud.ibm.com/docs/openwhisk?topic=cloud-functions-triggers) to schedule invocations. Details are left to the reader... :)
