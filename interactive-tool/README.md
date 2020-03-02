@@ -16,3 +16,8 @@ The tool is used to explore the Python SDK (https://github.com/ibm-cloud-securit
 3. Launch `python3 sec-adv-findings.py`.
 
 For more details follow the [instructions](/INSTRUCTIONS.md) on how to set up the entire project.
+
+
+The following shows the beginning of an interactive session:   
+
+![Command Line Tool](/screenshots/20200302_SecAdv_CLI1.png)
