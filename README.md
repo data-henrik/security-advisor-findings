@@ -12,6 +12,14 @@ This repository has code
 
 The [setup and usage instructions](/INSTRUCTIONS.md) are provided in a separate document.
 
+The code is also discussed in the following posts on [my blog](https://blog.4loeser.net):
+* [Extend IBM Cloud Security Advisor with your own security metrics](https://blog.4loeser.net/2020/03/extend-ibm-cloud-security-advisor-with.html)
+* [Manage your Security Advisor custom findings from the command line](https://blog.4loeser.net/2020/03/manage-your-security-advisor-custom.html)
+* [Use Cloud Functions for security scans (IBM Cloud Security Advisor)](https://blog.4loeser.net/2020/03/use-cloud-functions-for-security-scans.html)
+
+Similar posts have also been published on the [IBM Cloud blog](https://www.ibm.com/cloud/blog/):
+* [Extend IBM Cloud Security Advisor With Your Own Security Metrics](https://www.ibm.com/cloud/blog/extend-ibm-cloud-security-advisor-with-your-own-security-metrics)
+
 # License
 
 See the [License](/LICENSE) file.

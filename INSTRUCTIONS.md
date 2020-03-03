@@ -77,6 +77,8 @@ The deployed actions need access privileges to scan the account configuration an
 8. For **Account management** find **User Management** and assign **Viewer** privilege. 
 9. With the two assignments listed under **Access summary**, click on **Assign** to complete the process. The service ID for the Cloud Functions namespace has now the necessary privileges.
 
+![Access Groups](/screenshots/SecAdv_AccessGroup.png)
+
 ### LogDNA access
 You need at least one instance of Activity Tracker with LogDNA deployed in order to take advantage of the event scanner. Go to https://cloud.ibm.com/observe/activitytracker for the setup.
 1. Click on **View LogDNA** to launch the LogDNA dashboard.
