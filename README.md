@@ -19,6 +19,7 @@ The code is also discussed in the following posts on [my blog](https://blog.4loe
 
 Similar posts have also been published on the [IBM Cloud blog](https://www.ibm.com/cloud/blog/):
 * [Extend IBM Cloud Security Advisor With Your Own Security Metrics](https://www.ibm.com/cloud/blog/extend-ibm-cloud-security-advisor-with-your-own-security-metrics)
+* [Manage Your Security Advisor Custom Findings from the Command Line](https://www.ibm.com/cloud/blog/manage-your-security-advisor-custom-findings-from-the-command-line)
 
 # License
 
